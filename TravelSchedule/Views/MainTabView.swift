@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  MainTabView.swift
 //  TravelSchedule
 //
 //  Created by Albina Musugalieva.
@@ -8,17 +8,48 @@
 import SwiftUI
 import OpenAPIURLSession
 
-struct ContentView: View {
+enum AppNetworkState {
+    case normal
+    case noInternet
+    case serverError
+}
+
+struct MainTabView: View {
+    @State private var networkState: AppNetworkState = .normal
+    
     var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "tram.fill")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Расписание Путешествий")
-                .font(.title)
+        ZStack {
+            TabView {
+                NavigationStack {
+                    MainScreenView(networkState: $networkState)
+                }
+                .tabItem {
+                    Image(.arrowUpMessageFill)
+                }
+                
+                SettingsScreenView()
+                    .tabItem {
+                        Image(.settingsLogo)
+                    }
+            }
+            
+            
+            if networkState != .normal {
+                errorOverlayView
+            }
         }
-        .padding()
         .onAppear {
+            let appearance = UITabBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = .clear
+            appearance.shadowColor = .clear
+            appearance.shadowImage = UIImage()
+            appearance.stackedLayoutAppearance.normal.iconColor = UIColor(Color(.ypGreyUniversal))
+            appearance.stackedLayoutAppearance.selected.iconColor = UIColor.label
+            appearance.stackedLayoutAppearance.normal.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 20)
+            appearance.stackedLayoutAppearance.selected.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 20)
+            UITabBar.appearance().standardAppearance = appearance
+            UITabBar.appearance().scrollEdgeAppearance = appearance
             Task {
                 guard let serverURL = try? Servers.Server1.url() else {
                     print("Не удалось получить URL сервера")
@@ -37,27 +68,41 @@ struct ContentView: View {
                 let carrierInfoService = CarrierInfoService(client: sharedClient, apikey: apiKey)
                 let allStationsService = AllStationsService(client: sharedClient, apikey: apiKey)
                 
-                
                 do { _ = try await copyrightService.getCopyright(); print("СopyrightService loaded successfully") } catch { print("CopyrightService error: \(error.localizedDescription)") }
-                
                 do { _ = try await nearestStationsService.getNearestStations(lat: 55.75, lng: 37.61, distance: 10); print("NearestStationsService loaded successfully") } catch { print("NearestStationsService error: \(error.localizedDescription)") }
-                
                 do { _ = try await scheduleBetweenStationsService.getSchedule(from: "c213", to: "c2"); print("ScheduleBetweenStationsService loaded successfully") } catch { print("ScheduleBetweenStationsService error: \(error.localizedDescription)") }
-                
                 do { _ = try await stationScheduleService.getSchedule(station: "s9600213"); print("StationScheduleService loaded successfully") } catch { print("StationScheduleService error: \(error.localizedDescription)") }
-                
                 do { _ = try await routeStationsService.getRouteStations(uid: "123"); print("RouteStationsService loaded successfully") } catch { print("RouteStationsService error: \(error.localizedDescription)") }
-                
                 do { _ = try await nearestCityService.getNearestCity(lat: 55.75, lng: 37.61); print("NearestCityService loaded successfully") } catch { print("NearestCityService error: \(error.localizedDescription)") }
-                
                 do { _ = try await carrierInfoService.getCarrierInfo(code: "123"); print("CarrierInfoService loaded successfully") } catch { print("CarrierInfoService error: \(error.localizedDescription)") }
-                
                 do { _ = try await allStationsService.getAllStations(); print("AllStationsService loaded successfully") } catch { print("AllStationsService error: \(error.localizedDescription)") }
             }
         }
     }
+    
+    
+    @ViewBuilder
+    private var errorOverlayView: some View {
+        switch networkState {
+        case .noInternet:
+            StatusErrorView(
+                imageResource: .noInternet,
+                message: "Нет интернета"
+            )
+            .onTapGesture {
+                networkState = .normal
+            }
+        case .serverError:
+            StatusErrorView(
+                imageResource: .serverError,
+                message: "Ошибка сервера"
+            )
+            .onTapGesture {
+                networkState = .normal
+            }
+        default:
+            EmptyView()
+        }
+    }
 }
 
-#Preview {
-    ContentView()
-}
