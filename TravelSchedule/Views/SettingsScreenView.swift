@@ -16,11 +16,11 @@ struct SettingsScreenView: View {
             VStack(spacing: 16) {
                 Text("Настройки")
                     .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.ypBlack)
+                    .foregroundStyle(.ypBlack)
                 
                 Text("Этот экран будет добавлен в следующем спринте.")
                     .font(.system(size: 15))
-                    .foregroundColor(.ypGreyUniversal)
+                    .foregroundStyle(.ypGreyUniversal)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }

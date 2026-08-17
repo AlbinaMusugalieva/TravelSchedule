@@ -75,17 +75,16 @@ struct CarriersListView: View {
             VStack(spacing: 0) {
                 Text("\(departureCity) (\(departureStation)) → \(arrivalCity) (\(arrivalStation))")
                     .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.ypBlack)
+                    .foregroundStyle(.ypBlack)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.top, 16)
+                    .padding([.horizontal, .top], 16)
                     .padding(.bottom, 12)
                 
                 if filteredTrips.isEmpty {
                     Spacer()
                     Text("Вариантов нет")
                         .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(Color(.ypBlack))
+                        .foregroundStyle(.ypBlack)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 16)
                     
@@ -107,19 +106,19 @@ struct CarriersListView: View {
                 }) {
                     Text("Уточнить время")
                         .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(.ypWhite)
+                        .foregroundStyle(.ypWhiteUniversal)
                         .frame(maxWidth: .infinity)
                         .frame(height: 60)
-                        .background(Color(.ypBlueUniversal))
+                        .background(.ypBlueUniversal)
                         .cornerRadius(16)
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
+                .padding([.horizontal, .bottom], 16)
                 .padding(.top, 8)    
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $isShowingFilters) {
+        .toolbar(.hidden, for: .tabBar) 
+        .fullScreenCover(isPresented: $isShowingFilters) {
             FiltersView(initialFilters: appliedFilters) { newFilters in
                 appliedFilters = newFilters
                 
@@ -147,12 +146,12 @@ struct CarriersListView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(trip.carrierName)
                             .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(Color(.ypBlack))
+                            .foregroundStyle(.ypBlackUniversal)
                         
                         if let transfer = trip.transferText {
                             Text(transfer)
                                 .font(.system(size: 12))
-                                .foregroundColor(Color(.ypRedUniversal))
+                                .foregroundStyle(.ypRedUniversal)
                         }
                     }
                     
@@ -160,14 +159,14 @@ struct CarriersListView: View {
                     
                     Text(trip.dateText)
                         .font(.system(size: 12))
-                        .foregroundColor(Color(.ypBlack))
+                        .foregroundStyle(.ypBlackUniversal)
                         .padding(.top, 2)
                 }
                 
                 HStack(spacing: 4) {
                     Text(trip.departureTime)
                         .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(Color(.ypBlack))
+                        .foregroundStyle(.ypBlackUniversal)
                     
                     ZStack {
                         Divider()
@@ -175,15 +174,15 @@ struct CarriersListView: View {
                         
                         Text(trip.durationText)
                             .font(.system(size: 12))
-                            .foregroundColor(Color(.ypBlack))
+                            .foregroundStyle(.ypBlackUniversal)
                             .padding(.horizontal, 8)
-                            .background(Color(.ypLightGray))
+                            .background(.ypLightGray)
                     }
                     .padding(.horizontal, 4)
                     
                     Text(trip.arrivalTime)
                         .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(Color(.ypBlack))
+                        .foregroundStyle(.ypBlackUniversal)
                 }
             }
             .padding(14)

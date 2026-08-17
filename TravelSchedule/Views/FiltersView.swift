@@ -12,7 +12,7 @@ struct FilterSettings {
     var isAfternoon: Bool = false
     var isEvening: Bool = false
     var isNight: Bool = false
-    var showWithTransfers: Bool? = nil
+    var showWithTransfers: Bool?
 }
 
 struct FiltersView: View {
@@ -43,7 +43,7 @@ struct FiltersView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(.ypBlack)
+                            .foregroundStyle(.ypBlack)
                     }
                     Spacer()
                 }
@@ -55,7 +55,7 @@ struct FiltersView: View {
                         VStack(alignment: .leading, spacing: 20) {
                             Text("Время отправления")
                                 .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.ypBlack)
+                                .foregroundStyle(.ypBlack)
                             
                             VStack(spacing: 0) {
                                 FilterCheckboxRow(title: "Утро 06:00 - 12:00", isChecked: $isMorning)
@@ -68,7 +68,7 @@ struct FiltersView: View {
                         VStack(alignment: .leading, spacing: 20) {
                             Text("Показывать варианты с\nпересадками")
                                 .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.ypBlack)
+                                .foregroundStyle(.ypBlack)
                                 .lineSpacing(4)
                             
                             VStack(spacing: 0) {
@@ -82,8 +82,7 @@ struct FiltersView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 16)
+                    .padding([.horizontal, .top], 16)
                     
                     Spacer().frame(height: 90)
                 }
@@ -105,14 +104,13 @@ struct FiltersView: View {
                     }) {
                         Text("Применить")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.ypWhite)
+                            .foregroundStyle(.ypWhite)
                             .frame(maxWidth: .infinity)
                             .frame(height: 60)
                             .background(.ypBlueUniversal)
                             .cornerRadius(16)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
+                    .padding([.horizontal, .bottom], 16)
                 }
             }
         }
@@ -138,13 +136,13 @@ struct FilterCheckboxRow: View {
             HStack {
                 Text(title)
                     .font(.system(size: 16))
-                    .foregroundColor(.ypBlack)
+                    .foregroundStyle(.ypBlack)
                 
                 Spacer()
                 
                 Image(systemName: isChecked ? "checkmark.square.fill" : "square")
                     .font(.system(size: 22))
-                    .foregroundColor(.ypBlack)
+                    .foregroundStyle(.ypBlack)
             }
             .frame(height: 48)
             .contentShape(Rectangle())
@@ -164,13 +162,13 @@ struct FilterRadioButtonRow: View {
             HStack {
                 Text(title)
                     .font(.system(size: 16))
-                    .foregroundColor(.ypBlack)
+                    .foregroundStyle(.ypBlack)
                 
                 Spacer()
                 
                 Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
                     .font(.system(size: 22))
-                    .foregroundColor(.ypBlack)
+                    .foregroundStyle(.ypBlack)
             }
             .frame(height: 48)
             .contentShape(Rectangle())

@@ -24,27 +24,32 @@ struct MainTabView: View {
                     MainScreenView(networkState: $networkState)
                 }
                 .tabItem {
-                    Label(
-                        title: { Text("Главная") },
-                        icon: { Image(.arrowUpMessageFill) }
-                    )
+                    Image(.arrowUpMessageFill)
                 }
                 
                 SettingsScreenView()
                     .tabItem {
-                        Label(
-                            title: { Text("Настройки") },
-                            icon: { Image(.settingsLogo) }
-                        )
+                        Image(.settingsLogo)
                     }
             }
-            .tint(.ypBlueUniversal)
+            
             
             if networkState != .normal {
                 errorOverlayView
             }
         }
         .onAppear {
+            let appearance = UITabBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = .clear
+            appearance.shadowColor = .clear
+            appearance.shadowImage = UIImage()
+            appearance.stackedLayoutAppearance.normal.iconColor = UIColor(Color(.ypGreyUniversal))
+            appearance.stackedLayoutAppearance.selected.iconColor = UIColor.label
+            appearance.stackedLayoutAppearance.normal.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 20)
+            appearance.stackedLayoutAppearance.selected.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 20)
+            UITabBar.appearance().standardAppearance = appearance
+            UITabBar.appearance().scrollEdgeAppearance = appearance
             Task {
                 guard let serverURL = try? Servers.Server1.url() else {
                     print("Не удалось получить URL сервера")

@@ -24,8 +24,7 @@ struct MainScreenView: View {
             
             VStack(spacing: 0) {
                 
-                Spacer()
-                    .frame(height: 140)
+                Spacer(minLength: 140)
                 HStack(spacing: 12) {
                     VStack(spacing: 0) {
                         MainInputRow(
@@ -46,18 +45,18 @@ struct MainScreenView: View {
                             isShowingCitySelection = true
                         }
                     }
-                    .background(.ypWhite)
+                    .background(.ypWhiteUniversal)
                     .cornerRadius(20)
                     
                     Button(action: swapDestinations) {
                         ZStack {
                             Circle()
-                                .fill(.ypWhite)
+                                .fill(.ypWhiteUniversal)
                                 .frame(width: 36, height: 36)
                             
                             Image(systemName: "arrow.2.squarepath")
                                 .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.ypBlueUniversal)
+                                .foregroundStyle(.ypBlueUniversal)
                         }
                     }
                     .padding(.trailing, 4)
@@ -77,7 +76,7 @@ struct MainScreenView: View {
                     )) {
                         Text("Найти")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.ypWhite)
+                            .foregroundStyle(.ypWhite)
                             .frame(width: 150, height: 48)
                             .background(.ypBlueUniversal)
                             .cornerRadius(16)
@@ -124,17 +123,13 @@ struct MainScreenView: View {
                     if city.isEmpty {
                         Text(placeholder)
                             .font(.system(size: 17, weight: .regular))
-                            .foregroundColor(.ypGreyUniversal)
+                            .foregroundStyle(.ypGreyUniversal)
                     } else {
                         Group {
-                            if station.isEmpty {
-                                Text(city)
-                            } else {
-                                Text("\(city) (\(station))")
-                            }
+                            Text(station.isEmpty ? city : "\(city) (\(station))")
                         }
                         .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(.ypBlack)
+                        .foregroundStyle(.ypBlackUniversal)
                         .lineLimit(1)
                         .truncationMode(.tail)
                     }

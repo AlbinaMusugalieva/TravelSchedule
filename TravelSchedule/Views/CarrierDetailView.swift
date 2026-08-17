@@ -26,11 +26,11 @@ struct CarrierDetailView: View {
                 
                 Text(carrierName)
                     .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.ypBlack)
+                    .foregroundStyle(.ypBlack)
                 
                 Text("Детальная карточка перевозчика будет добавлена в следующем спринте.")
                     .font(.system(size: 15))
-                    .foregroundColor(Color(.ypGreyUniversal))
+                    .foregroundStyle(Color(.ypGreyUniversal))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
                 Spacer()
@@ -39,6 +39,7 @@ struct CarrierDetailView: View {
         .navigationTitle("О перевозчике")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .tabBar) 
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
@@ -46,7 +47,7 @@ struct CarrierDetailView: View {
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.ypBlack)
+                        .foregroundStyle(.ypBlack)
                 }
             }
         }

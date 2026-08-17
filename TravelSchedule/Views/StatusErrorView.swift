@@ -24,7 +24,7 @@ struct StatusErrorView: View {
                 
                 Text(message)
                     .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.ypBlack)
+                    .foregroundStyle(.ypBlack)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 16)
             }

@@ -11,6 +11,7 @@ struct CitySelectionView: View {
     @Binding var isPresented: Bool
     var onSelect: (String, String) -> Void
     @State private var searchText: String = ""
+    @Environment(\.colorScheme) private var colorScheme
     
     let cities = ["Москва", "Санкт-Петербург", "Сочи", "Горный воздух", "Краснодар", "Казань", "Омск"]
     
@@ -31,14 +32,14 @@ struct CitySelectionView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(.ypBlack)
+                            .foregroundStyle(.ypBlack)
                     }
                     
                     Spacer()
                     
                     Text("Выбор города")
                         .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(.ypBlack)
+                        .foregroundStyle(.ypBlack)
                     
                     Spacer()
                     
@@ -51,33 +52,34 @@ struct CitySelectionView: View {
                 
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(.ypGreyUniversal)
+                        .foregroundStyle(.ypGreyUniversal)
                     
                     TextField("Введите запрос", text: $searchText)
                         .font(.system(size: 16))
-                        .foregroundColor(.ypBlack)
+                        .foregroundStyle(.ypBlack)
                     
                     if !searchText.isEmpty {
                         Button {
                             searchText = ""
                         } label: {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.ypGreyUniversal)
+                                .foregroundStyle(.ypGreyUniversal)
                         }
                     }
                 }
                 .padding(.horizontal, 12)
                 .frame(height: 36)
-                .background(.ypLightGray)
+                .background(
+                    colorScheme == .dark ? Color(.ypFillsTertiary) : Color(.ypLightGray)
+                )
                 .cornerRadius(10)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
+                .padding([.horizontal, .bottom], 16)
                 
                 if filteredCities.isEmpty {
                     Spacer()
                     Text("Город не найден")
                         .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.ypBlack)
+                        .foregroundStyle(.ypBlack)
                     Spacer()
                 } else {
                     ScrollView {
@@ -93,13 +95,13 @@ struct CitySelectionView: View {
                                     HStack {
                                         Text(city)
                                             .font(.system(size: 17, weight: .regular))
-                                            .foregroundColor(.ypBlack)
+                                            .foregroundStyle(.ypBlack)
                                         
                                         Spacer()
                                         
                                         Image(systemName: "chevron.right")
                                             .font(.system(size: 14, weight: .semibold))
-                                            .foregroundColor(.ypBlack)
+                                            .foregroundStyle(.ypBlack)
                                     }
                                     .padding(.horizontal, 16)
                                     .frame(height: 54)
