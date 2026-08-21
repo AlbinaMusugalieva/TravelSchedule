@@ -8,31 +8,59 @@
 import SwiftUI
 
 struct SettingsScreenView: View {
+    @AppStorage("isDarkMode") private var isDarkMode = false
+    @State private var showAgreement = false
+    
     var body: some View {
-        ZStack {
-            Color(.ypWhite)
-                .ignoresSafeArea()
-            
-            VStack(spacing: 16) {
-                Text("Настройки")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(.ypBlack)
+        NavigationStack {
+            ZStack {
+                Color(.ypWhite)
+                    .ignoresSafeArea()
                 
-                Text("Этот экран будет добавлен в следующем спринте.")
-                    .font(.system(size: 15))
-                    .foregroundStyle(.ypGreyUniversal)
+                VStack(spacing: 0) {
+                    Toggle(isOn: $isDarkMode) {
+                        Text("Тёмная тема")
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundStyle(.ypBlack)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+                    .tint(.ypBlueUniversal)
+                    
+                    Button {
+                        showAgreement = true
+                    } label: {
+                        HStack {
+                            Text("Пользовательское соглашение")
+                                .font(.system(size: 17, weight: .regular))
+                                .foregroundStyle(.ypBlack)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 17, weight: .regular))
+                                .foregroundStyle(.ypBlack)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+                    
+                    Spacer()
+                    
+                    VStack(spacing: 4) {
+                        Text("Приложение использует API «Яндекс.Расписания»")
+                        Text("Версия 1.0 (beta)")
+                    }
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(.ypBlack)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
+                    .padding(.bottom, 24)
+                }
+                .padding(.top, 16)
             }
-        }
-    }
-}
-
-struct SettingsPlaceholderView_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            SettingsScreenView().preferredColorScheme(.light)
-            SettingsScreenView().preferredColorScheme(.dark)
+            .navigationTitle("Настройки")
+            .navigationBarTitleDisplayMode(.inline)
+            .fullScreenCover(isPresented: $showAgreement) {
+                UserAgreementView()
+            }
         }
     }
 }

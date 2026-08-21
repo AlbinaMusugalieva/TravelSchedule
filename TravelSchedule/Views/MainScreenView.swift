@@ -16,85 +16,109 @@ struct MainScreenView: View {
     @State private var arrivalStation: String = ""
     @State private var isShowingCitySelection = false
     @State private var isSelectingForSource = true
+    @State private var stories = mockStories
+    @State private var selectedStoryIndex: Int? = nil
+    @State private var showStoriesFullscreen = false
     
     var body: some View {
         ZStack {
             Color(.ypWhite)
                 .ignoresSafeArea()
             
-            VStack(spacing: 0) {
-                
-                Spacer(minLength: 140)
-                HStack(spacing: 12) {
-                    VStack(spacing: 0) {
-                        MainInputRow(
-                            placeholder: "Откуда",
-                            city: departureCity,
-                            station: departureStation
-                        ) {
-                            isSelectingForSource = true
-                            isShowingCitySelection = true
-                        }
-                        
-                        MainInputRow(
-                            placeholder: "Куда",
-                            city: arrivalCity,
-                            station: arrivalStation
-                        ) {
-                            isSelectingForSource = false
-                            isShowingCitySelection = true
+            VStack(spacing: 24) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(0..<stories.count, id: \.self) { index in
+                            StoryCell(stories: stories[index])
+                                .onTapGesture {
+                                    selectedStoryIndex = index
+                                    showStoriesFullscreen = true
+                                    
+                                    stories[index].isWatched = true
+                                }
                         }
                     }
-                    .background(.ypWhiteUniversal)
-                    .cornerRadius(20)
-                    
-                    Button(action: swapDestinations) {
-                        ZStack {
-                            Circle()
-                                .fill(.ypWhiteUniversal)
-                                .frame(width: 36, height: 36)
+                    .padding(.horizontal, 16)
+                }
+                .padding(.top, 16)
+                
+                VStack(spacing: 0) {
+                    HStack(spacing: 12) {
+                        VStack(spacing: 0) {
+                            MainInputRow(
+                                placeholder: "Откуда",
+                                city: departureCity,
+                                station: departureStation
+                            ) {
+                                isSelectingForSource = true
+                                isShowingCitySelection = true
+                            }
                             
-                            Image(systemName: "arrow.2.squarepath")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundStyle(.ypBlueUniversal)
+                            MainInputRow(
+                                placeholder: "Куда",
+                                city: arrivalCity,
+                                station: arrivalStation
+                            ) {
+                                isSelectingForSource = false
+                                isShowingCitySelection = true
+                            }
                         }
+                        .background(.ypWhiteUniversal)
+                        .cornerRadius(20)
+                        
+                        Button(action: swapDestinations) {
+                            ZStack {
+                                Circle()
+                                    .fill(.ypWhiteUniversal)
+                                    .frame(width: 36, height: 36)
+                                
+                                Image(systemName: "arrow.2.squarepath")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundStyle(.ypBlueUniversal)
+                            }
+                        }
+                        .padding(.trailing, 4)
                     }
-                    .padding(.trailing, 4)
-                }
-                .padding(16)
-                .background(.ypBlueUniversal)
-                .cornerRadius(24)
-                .padding(.horizontal, 16)
-                
-                if !departureCity.isEmpty && !arrivalCity.isEmpty {
-                    NavigationLink(destination: CarriersListView(
-                        networkState: $networkState,
-                        departureCity: departureCity,
-                        departureStation: departureStation,
-                        arrivalCity: arrivalCity,
-                        arrivalStation: arrivalStation
-                    )) {
-                        Text("Найти")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.ypWhite)
-                            .frame(width: 150, height: 48)
-                            .background(.ypBlueUniversal)
-                            .cornerRadius(16)
+                    .padding(16)
+                    .background(.ypBlueUniversal)
+                    .cornerRadius(24)
+                    .padding(.horizontal, 16)
+                    
+                    if !departureCity.isEmpty && !arrivalCity.isEmpty {
+                        NavigationLink(destination: CarriersListView(
+                            networkState: $networkState,
+                            departureCity: departureCity,
+                            departureStation: departureStation,
+                            arrivalCity: arrivalCity,
+                            arrivalStation: arrivalStation
+                        )) {
+                            Text("Найти")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(.ypWhite)
+                                .frame(width: 150, height: 48)
+                                .background(.ypBlueUniversal)
+                                .cornerRadius(16)
+                        }
+                        .padding(.top, 24)
                     }
-                    .padding(.top, 24)
                 }
                 
-                Spacer()
+                Spacer() 
             }
-        }
-        .fullScreenCover(isPresented: $isShowingCitySelection) {
-            CitySelectionView(isPresented: $isShowingCitySelection) { selectedCity, selectedStation in
-                if isSelectingForSource {
-                    departureCity = selectedCity
-                    departureStation = selectedStation
-                } else {
-                    arrivalCity = selectedCity
-                    arrivalStation = selectedStation
+            .fullScreenCover(isPresented: $isShowingCitySelection) {
+                CitySelectionView(isPresented: $isShowingCitySelection) { selectedCity, selectedStation in
+                    if isSelectingForSource {
+                        departureCity = selectedCity
+                        departureStation = selectedStation
+                    } else {
+                        arrivalCity = selectedCity
+                        arrivalStation = selectedStation
+                    }
+                }
+            }
+            .fullScreenCover(isPresented: $showStoriesFullscreen) {
+                if let index = selectedStoryIndex {
+                    StoriesFullscreenView(stories: $stories, currentIndex: index)
                 }
             }
         }

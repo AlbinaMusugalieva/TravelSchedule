@@ -93,9 +93,13 @@ struct CarriersListView: View {
                     ScrollView {
                         VStack(spacing: 8) {
                             ForEach(filteredTrips) { trip in
-                                NavigationLink(destination: CarrierDetailView(carrierName: trip.carrierName, carrierLogo: trip.logoImage)) {
-                                    TripCardView(trip: trip)
-                                }
+                                NavigationLink(destination: CarrierDetailView(
+                                    carrierName: trip.carrierName,
+                                    carrierLogo: trip.logoImage,
+                                    carrierEmail: "rzd@mail.ru",
+                                    carrierPhone: "+7 (495) 123-45-67")) {
+                                        TripCardView(trip: trip)
+                                    }
                             }
                         }
                         .padding(.horizontal, 16)
@@ -113,11 +117,11 @@ struct CarriersListView: View {
                         .cornerRadius(16)
                 }
                 .padding([.horizontal, .bottom], 16)
-                .padding(.top, 8)    
+                .padding(.top, 8)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .tabBar) 
+        .toolbar(.hidden, for: .tabBar)
         .fullScreenCover(isPresented: $isShowingFilters) {
             FiltersView(initialFilters: appliedFilters) { newFilters in
                 appliedFilters = newFilters

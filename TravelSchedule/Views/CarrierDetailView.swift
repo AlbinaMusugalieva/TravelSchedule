@@ -9,37 +9,61 @@ import SwiftUI
 
 struct CarrierDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    
     let carrierName: String
     let carrierLogo: ImageResource
+    let carrierEmail: String
+    let carrierPhone: String
     
     var body: some View {
         ZStack {
             Color(.ypWhite)
                 .ignoresSafeArea()
             
-            VStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 0) {
                 Image(carrierLogo)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 343, height: 104)
-                    .padding(.top, 16)
+                    .frame(height: 104)
+                    .frame(maxWidth: .infinity)
+                    .padding([.top,.bottom], 16)
                 
                 Text(carrierName)
                     .font(.system(size: 24, weight: .bold))
                     .foregroundStyle(.ypBlack)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 24)
                 
-                Text("Детальная карточка перевозчика будет добавлена в следующем спринте.")
-                    .font(.system(size: 15))
-                    .foregroundStyle(Color(.ypGreyUniversal))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("E-mail")
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundStyle(.ypBlack)
+                    
+                    Text(carrierEmail)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(.ypBlueUniversal)
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 24)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Телефон")
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundStyle(.ypBlack)
+                    
+                    Text(carrierPhone)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(.ypBlueUniversal)
+                }
+                .padding(.horizontal, 16)
+                
                 Spacer()
             }
         }
-        .navigationTitle("О перевозчике")
+        .navigationTitle("Информация о перевозчике")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
-        .toolbar(.hidden, for: .tabBar) 
+        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
