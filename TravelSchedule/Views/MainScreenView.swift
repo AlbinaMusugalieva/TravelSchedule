@@ -9,16 +9,7 @@ import SwiftUI
 
 struct MainScreenView: View {
     @Binding var networkState: AppNetworkState
-    
-    @State private var departureCity: String = ""
-    @State private var departureStation: String = ""
-    @State private var arrivalCity: String = ""
-    @State private var arrivalStation: String = ""
-    @State private var isShowingCitySelection = false
-    @State private var isSelectingForSource = true
-    @State private var stories = mockStories
-    @State private var selectedStoryIndex: Int? = nil
-    @State private var showStoriesFullscreen = false
+    @StateObject private var viewModel = MainScreenViewModel()
     
     var body: some View {
         ZStack {
@@ -28,13 +19,10 @@ struct MainScreenView: View {
             VStack(spacing: 24) {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
-                        ForEach(0..<stories.count, id: \.self) { index in
-                            StoryCell(stories: stories[index])
+                        ForEach(0..<viewModel.stories.count, id: \.self) { index in
+                            StoryCell(stories: viewModel.stories[index])
                                 .onTapGesture {
-                                    selectedStoryIndex = index
-                                    showStoriesFullscreen = true
-                                    
-                                    stories[index].isWatched = true
+                                    viewModel.selectStory(at: index)
                                 }
                         }
                     }
@@ -47,26 +35,26 @@ struct MainScreenView: View {
                         VStack(spacing: 0) {
                             MainInputRow(
                                 placeholder: "Откуда",
-                                city: departureCity,
-                                station: departureStation
+                                city: viewModel.departureCity,
+                                station: viewModel.departureStation
                             ) {
-                                isSelectingForSource = true
-                                isShowingCitySelection = true
+                                viewModel.isSelectingForSource = true
+                                viewModel.isShowingCitySelection = true
                             }
                             
                             MainInputRow(
                                 placeholder: "Куда",
-                                city: arrivalCity,
-                                station: arrivalStation
+                                city: viewModel.arrivalCity,
+                                station: viewModel.arrivalStation
                             ) {
-                                isSelectingForSource = false
-                                isShowingCitySelection = true
+                                viewModel.isSelectingForSource = false
+                                viewModel.isShowingCitySelection = true
                             }
                         }
                         .background(.ypWhiteUniversal)
                         .cornerRadius(20)
                         
-                        Button(action: swapDestinations) {
+                        Button(action: viewModel.swapDestinations) {
                             ZStack {
                                 Circle()
                                     .fill(.ypWhiteUniversal)
@@ -83,14 +71,15 @@ struct MainScreenView: View {
                     .background(.ypBlueUniversal)
                     .cornerRadius(24)
                     .padding(.horizontal, 16)
-                    
-                    if !departureCity.isEmpty && !arrivalCity.isEmpty {
+                    if !viewModel.departureCity.isEmpty && !viewModel.arrivalCity.isEmpty {
                         NavigationLink(destination: CarriersListView(
                             networkState: $networkState,
-                            departureCity: departureCity,
-                            departureStation: departureStation,
-                            arrivalCity: arrivalCity,
-                            arrivalStation: arrivalStation
+                            departureCity: viewModel.departureCity,
+                            departureStation: viewModel.departureStation,
+                            departureCode: viewModel.departureCode,
+                            arrivalCity: viewModel.arrivalCity,
+                            arrivalStation: viewModel.arrivalStation,
+                            arrivalCode: viewModel.arrivalCode
                         )) {
                             Text("Найти")
                                 .font(.system(size: 16, weight: .semibold))
@@ -102,37 +91,49 @@ struct MainScreenView: View {
                         .padding(.top, 24)
                     }
                 }
-                
-                Spacer() 
+                Spacer()
             }
-            .fullScreenCover(isPresented: $isShowingCitySelection) {
-                CitySelectionView(isPresented: $isShowingCitySelection) { selectedCity, selectedStation in
-                    if isSelectingForSource {
-                        departureCity = selectedCity
-                        departureStation = selectedStation
+            .fullScreenCover(isPresented: $viewModel.isShowingCitySelection) {
+                CitySelectionView(isPresented: $viewModel.isShowingCitySelection) { station in
+                    if viewModel.isSelectingForSource {
+                        viewModel.departureStation = station.name
+                        viewModel.departureCode = station.code
+                        
+                        if station.code == "s9602494" || station.code == "s9602554" {
+                            viewModel.departureCity = "Санкт-Петербург"
+                        } else if station.code == "s9613143" {
+                            viewModel.departureCity = "Сочи"
+                        } else if station.code == "s9613123" {
+                            viewModel.departureCity = "Краснодар"
+                        } else if station.code == "s9610011" {
+                            viewModel.departureCity = "Казань"
+                        } else {
+                            viewModel.departureCity = "Москва"
+                        }
                     } else {
-                        arrivalCity = selectedCity
-                        arrivalStation = selectedStation
+                        viewModel.arrivalStation = station.name
+                        viewModel.arrivalCode = station.code
+                        
+                        if station.code == "s9602494" || station.code == "s9602554" {
+                            viewModel.arrivalCity = "Санкт-Петербург"
+                        } else if station.code == "s9613143" {
+                            viewModel.arrivalCity = "Сочи"
+                        } else if station.code == "s9613123" {
+                            viewModel.arrivalCity = "Краснодар"
+                        } else if station.code == "s9610011" {
+                            viewModel.arrivalCity = "Казань"
+                        } else {
+                            viewModel.arrivalCity = "Москва"
+                        }
                     }
                 }
             }
-            .fullScreenCover(isPresented: $showStoriesFullscreen) {
-                if let index = selectedStoryIndex {
-                    StoriesFullscreenView(stories: $stories, currentIndex: index)
+            .fullScreenCover(isPresented: $viewModel.showStoriesFullscreen) {
+                if let index = viewModel.selectedStoryIndex {
+                    StoriesFullscreenView(stories: $viewModel.stories, currentIndex: index)
                 }
             }
         }
-    }
-    
-    private func swapDestinations() {
-        let tempCity = departureCity
-        let tempStation = departureStation
-        
-        departureCity = arrivalCity
-        departureStation = arrivalStation
-        
-        arrivalCity = tempCity
-        arrivalStation = tempStation
     }
     
     struct MainInputRow: View {
@@ -157,7 +158,6 @@ struct MainScreenView: View {
                         .lineLimit(1)
                         .truncationMode(.tail)
                     }
-                    
                     Spacer()
                 }
                 .padding(.horizontal, 16)

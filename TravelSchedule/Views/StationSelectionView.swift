@@ -10,29 +10,19 @@ import SwiftUI
 struct StationSelectionView: View {
     @Environment(\.dismiss) private var dismiss
     
-    let cityName: String
-    
+    let city: City
     @Binding var isRootPresented: Bool
-    var onSelectStation: (String) -> Void
+    var onSelectStation: (Station) -> Void
     
     @State private var searchText: String = ""
     @Environment(\.colorScheme) private var colorScheme
     
-    let stations = [
-        "Курский вокзал",
-        "Балтийский вокзал",
-        "Ленинградский вокзал",
-        "Московский вокзал",
-        "Ярославский вокзал",
-        "Казанский вокзал"
-    ]
-    
-    var filteredStations: [String] {
-        if searchText.isEmpty {
-            return stations
-        } else {
-            return stations.filter { $0.localizedCaseInsensitiveContains(searchText) }
+    var filteredStations: [Station] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else {
+            return city.stations
         }
+        return city.stations.filter { $0.name.localizedCaseInsensitiveContains(query) }
     }
     
     var body: some View {
@@ -45,46 +35,28 @@ struct StationSelectionView: View {
                         .font(.system(size: 20, weight: .medium))
                         .foregroundStyle(.ypBlack)
                 }
-                
                 Spacer()
-                
                 Text("Выбор вокзала")
                     .font(.system(size: 17, weight: .bold))
                     .foregroundStyle(.ypBlack)
-                
                 Spacer()
-                
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 20))
-                    .opacity(0)
+                Image(systemName: "chevron.left").font(.system(size: 20)).opacity(0)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             
             HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.ypGreyUniversal)
-                
+                Image(systemName: "magnifyingglass").foregroundStyle(.ypGreyUniversal)
                 TextField("Введите запрос", text: $searchText)
                     .font(.system(size: 16))
                     .foregroundStyle(.ypBlack)
-                
                 if !searchText.isEmpty {
-                    Button {
-                        searchText = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.ypGreyUniversal)
-                    }
+                    Button { searchText = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.ypGreyUniversal) }
                 }
             }
-            .padding(.horizontal, 12)
-            .frame(height: 36)
-            .background(
-                colorScheme == .dark ? Color(.ypFillsTertiary) : Color(.ypLightGray)
-            )
-            .cornerRadius(10)
-            .padding([.horizontal, .bottom], 16)
+            .padding(.horizontal, 12).frame(height: 36)
+            .background(colorScheme == .dark ? Color(.ypFillsTertiary) : Color(.ypLightGray))
+            .cornerRadius(10).padding([.horizontal, .bottom], 16)
             
             if filteredStations.isEmpty {
                 Spacer()
@@ -94,19 +66,17 @@ struct StationSelectionView: View {
                 Spacer()
             } else {
                 ScrollView {
-                    VStack(spacing: 0) {
-                        ForEach(filteredStations, id: \.self) { station in
+                    LazyVStack(spacing: 0) {
+                        ForEach(filteredStations) { station in
                             Button {
                                 onSelectStation(station)
                                 isRootPresented = false
                             } label: {
                                 HStack {
-                                    Text(station)
+                                    Text(station.name)
                                         .font(.system(size: 17, weight: .regular))
                                         .foregroundStyle(.ypBlack)
-                                    
                                     Spacer()
-                                    
                                     Image(systemName: "chevron.right")
                                         .font(.system(size: 14, weight: .semibold))
                                         .foregroundStyle(.ypBlack)
@@ -115,9 +85,9 @@ struct StationSelectionView: View {
                                 .frame(height: 54)
                                 .contentShape(Rectangle())
                             }
+                            .buttonStyle(.plain)
                             
-                            Divider()
-                                .padding(.horizontal, 16)
+                            Divider().padding(.horizontal, 16)
                         }
                     }
                 }

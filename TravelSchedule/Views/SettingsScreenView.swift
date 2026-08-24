@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct SettingsScreenView: View {
-    @AppStorage("isDarkMode") private var isDarkMode = false
-    @State private var showAgreement = false
+    @StateObject private var viewModel = SettingsScreenViewModel()
     
     var body: some View {
         NavigationStack {
@@ -18,7 +17,7 @@ struct SettingsScreenView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    Toggle(isOn: $isDarkMode) {
+                    Toggle(isOn: $viewModel.isDarkMode) {
                         Text("Тёмная тема")
                             .font(.system(size: 17, weight: .regular))
                             .foregroundStyle(.ypBlack)
@@ -28,7 +27,7 @@ struct SettingsScreenView: View {
                     .tint(.ypBlueUniversal)
                     
                     Button {
-                        showAgreement = true
+                        viewModel.showAgreement = true
                     } label: {
                         HStack {
                             Text("Пользовательское соглашение")
@@ -58,9 +57,12 @@ struct SettingsScreenView: View {
             }
             .navigationTitle("Настройки")
             .navigationBarTitleDisplayMode(.inline)
-            .fullScreenCover(isPresented: $showAgreement) {
-                UserAgreementView()
+            .navigationDestination(isPresented: $viewModel.showAgreement) {
+                if let url = viewModel.agreementURL {
+                    UserAgreementView(url: url, isPresented: $viewModel.showAgreement)
+                }
             }
         }
+        .preferredColorScheme(viewModel.isDarkMode ? .dark : .light)
     }
 }
