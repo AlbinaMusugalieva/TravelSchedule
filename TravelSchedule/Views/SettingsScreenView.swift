@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 struct SettingsScreenView: View {
     @StateObject private var viewModel = SettingsScreenViewModel()
     

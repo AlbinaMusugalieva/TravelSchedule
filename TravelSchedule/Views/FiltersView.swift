@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct FilterSettings {
     var isMorning: Bool = false
@@ -15,21 +16,25 @@ struct FilterSettings {
     var showWithTransfers: Bool?
 }
 
+@MainActor
 struct FiltersView: View {
     @Environment(\.dismiss) private var dismiss
     
     let initialFilters: FilterSettings
-    var onApply: (FilterSettings) -> Void
+    var onApply: @Sendable (FilterSettings) -> Void
     
-    @State private var isMorning: Bool = false
-    @State private var isAfternoon: Bool = false
-    @State private var isEvening: Bool = false
-    @State private var isNight: Bool = false
-    @State private var showWithTransfers: Bool? = nil
+    @StateObject private var viewModel: FiltersViewModel
     
-    var isAnyFilterSelected: Bool {
-        isMorning || isAfternoon || isEvening || isNight || (showWithTransfers != nil)
+    init(initialFilters: FilterSettings, onApply: @escaping @Sendable (FilterSettings) -> Void) {
+        self.initialFilters = initialFilters;
+        self.onApply = onApply; // Добавь эту строчку!
+        self._viewModel = StateObject(wrappedValue: FiltersViewModel(
+            initialFilters: initialFilters,
+            onApply: onApply
+        ));
     }
+    
+    var isAnyFilterSelected: Bool { viewModel.isAnyFilterSelected }
     
     var body: some View {
         ZStack {
@@ -58,10 +63,10 @@ struct FiltersView: View {
                                 .foregroundStyle(.ypBlack)
                             
                             VStack(spacing: 0) {
-                                FilterCheckboxRow(title: "Утро 06:00 - 12:00", isChecked: $isMorning)
-                                FilterCheckboxRow(title: "День 12:00 - 18:00", isChecked: $isAfternoon)
-                                FilterCheckboxRow(title: "Вечер 18:00 - 00:00", isChecked: $isEvening)
-                                FilterCheckboxRow(title: "Ночь 00:00 - 06:00", isChecked: $isNight)
+                                FilterCheckboxRow(title: "Утро 06:00 - 12:00", isChecked: $viewModel.isMorning)
+                                FilterCheckboxRow(title: "День 12:00 - 18:00", isChecked: $viewModel.isAfternoon)
+                                FilterCheckboxRow(title: "Вечер 18:00 - 00:00", isChecked: $viewModel.isEvening)
+                                FilterCheckboxRow(title: "Ночь 00:00 - 06:00", isChecked: $viewModel.isNight)
                             }
                         }
                         
@@ -72,12 +77,12 @@ struct FiltersView: View {
                                 .lineSpacing(4)
                             
                             VStack(spacing: 0) {
-                                FilterRadioButtonRow(title: "Да", isSelected: showWithTransfers == true) {
-                                    showWithTransfers = true
+                                FilterRadioButtonRow(title: "Да", isSelected: viewModel.showWithTransfers == true) {
+                                    viewModel.selectTransfers(true)
                                 }
-                                
-                                FilterRadioButtonRow(title: "Нет", isSelected: showWithTransfers == false) {
-                                    showWithTransfers = false
+
+                                FilterRadioButtonRow(title: "Нет", isSelected: viewModel.showWithTransfers == false) {
+                                    viewModel.selectTransfers(false)
                                 }
                             }
                         }
@@ -92,14 +97,7 @@ struct FiltersView: View {
                 VStack {
                     Spacer()
                     Button(action: {
-                        let updatedFilters = FilterSettings(
-                            isMorning: isMorning,
-                            isAfternoon: isAfternoon,
-                            isEvening: isEvening,
-                            isNight: isNight,
-                            showWithTransfers: showWithTransfers
-                        )
-                        onApply(updatedFilters)
+                        viewModel.applyFilters()
                         dismiss()
                     }) {
                         Text("Применить")
@@ -115,12 +113,8 @@ struct FiltersView: View {
             }
         }
         .navigationBarHidden(true)
-        .onAppear {
-            isMorning = initialFilters.isMorning
-            isAfternoon = initialFilters.isAfternoon
-            isEvening = initialFilters.isEvening
-            isNight = initialFilters.isNight
-            showWithTransfers = initialFilters.showWithTransfers
+        .task {
+            viewModel.setupInitialFilters(initialFilters)
         }
     }
 }
@@ -175,3 +169,4 @@ struct FilterRadioButtonRow: View {
         }
     }
 }
+

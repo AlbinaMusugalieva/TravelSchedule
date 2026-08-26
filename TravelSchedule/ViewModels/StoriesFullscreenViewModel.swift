@@ -8,13 +8,13 @@ import SwiftUI
 import Combine
 
 @MainActor
-final class StoriesFullscreenViewModel: ObservableObject {
+final class StoriesFullscreenViewModel: ObservableObject, Sendable {
     @Published var progress: Double = 0.0
     
     private let storyDuration: Double = 10.0
     private var timerTask: Task<Void, Never>? = nil
     
-    func startTimer(onNext: @escaping () -> Void) {
+    func startTimer(onNext: @escaping @Sendable () -> Void){
         timerTask?.cancel()
         progress = 0.0
         

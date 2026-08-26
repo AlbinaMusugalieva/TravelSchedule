@@ -9,7 +9,7 @@ import SwiftUI
 import Combine
 
 @MainActor
-final class CarriersListViewModel: ObservableObject {
+final class CarriersListViewModel: ObservableObject, Sendable {
     @Published var trips: [TrainTrip] = []
     @Published var appliedFilters = FilterSettings()
     @Published var isShowingFilters = false
@@ -19,6 +19,13 @@ final class CarriersListViewModel: ObservableObject {
     private let networkClient: NetworkClient
     let departureStationName: String
     let arrivalStationName: String
+    
+    private let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
+    
     
     init(fromCode: String, toCode: String, networkClient: NetworkClient = TravelScheduleApp.sharedNetworkClient) {
         self.departureStationName = fromCode
@@ -37,13 +44,12 @@ final class CarriersListViewModel: ObservableObject {
             let responseContainer = try await networkClient.getScheduleBetweenStations(from: fromCode, to: toCode)
             let segments = responseContainer.segments ?? []
             
-            let timeFormatter = DateFormatter()
-            timeFormatter.dateFormat = "HH:mm"
+            
             
             let fetchedTrips = segments.map { segment in
                 let carrierName = segment.thread?.carrier?.title ?? "Поезд"
-                let departureTime = segment.departure.map { timeFormatter.string(from: $0) } ?? "00:00"
-                let arrivalTime = segment.arrival.map { timeFormatter.string(from: $0) } ?? "00:00"
+                let departureTime = segment.departure.map { self.timeFormatter.string(from: $0) } ?? "00:00"
+                let arrivalTime = segment.arrival.map { self.timeFormatter.string(from: $0) } ?? "00:00"
                 let durationSeconds = segment.duration ?? 0
                 let durationText = "\(Int(durationSeconds) / 3600) часов"
                 let currentCarrierCode = String(segment.thread?.carrier?.code ?? 0)

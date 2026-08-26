@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 struct MainScreenView: View {
     @Binding var networkState: AppNetworkState
     @StateObject private var viewModel = MainScreenViewModel()
@@ -94,36 +95,10 @@ struct MainScreenView: View {
                 Spacer()
             }
             .fullScreenCover(isPresented: $viewModel.isShowingCitySelection) {
-                CitySelectionView(isPresented: $viewModel.isShowingCitySelection) { station in
-                    if viewModel.isSelectingForSource {
-                        viewModel.departureStation = station.name
-                        viewModel.departureCode = station.code
-                        
-                        if station.code == "s9602494" || station.code == "s9602554" {
-                            viewModel.departureCity = "Санкт-Петербург"
-                        } else if station.code == "s9613143" {
-                            viewModel.departureCity = "Сочи"
-                        } else if station.code == "s9613123" {
-                            viewModel.departureCity = "Краснодар"
-                        } else if station.code == "s9610011" {
-                            viewModel.departureCity = "Казань"
-                        } else {
-                            viewModel.departureCity = "Москва"
-                        }
-                    } else {
-                        viewModel.arrivalStation = station.name
-                        viewModel.arrivalCode = station.code
-                        
-                        if station.code == "s9602494" || station.code == "s9602554" {
-                            viewModel.arrivalCity = "Санкт-Петербург"
-                        } else if station.code == "s9613143" {
-                            viewModel.arrivalCity = "Сочи"
-                        } else if station.code == "s9613123" {
-                            viewModel.arrivalCity = "Краснодар"
-                        } else if station.code == "s9610011" {
-                            viewModel.arrivalCity = "Казань"
-                        } else {
-                            viewModel.arrivalCity = "Москва"
+                CitySelectionView(isPresented: $viewModel.isShowingCitySelection) { @Sendable station in
+                    Task {
+                        await MainActor.run {
+                            viewModel.selectStation(station)
                         }
                     }
                 }

@@ -9,7 +9,7 @@ import SwiftUI
 import Combine
 
 @MainActor
-final class SettingsScreenViewModel: ObservableObject {
+final class SettingsScreenViewModel: ObservableObject, Sendable {
     @AppStorage("isDarkMode") var isDarkMode = false
     @Published var showAgreement = false
     

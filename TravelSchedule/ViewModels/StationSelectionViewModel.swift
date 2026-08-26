@@ -9,23 +9,20 @@ import SwiftUI
 import Combine
 
 @MainActor
-final class StationSelectionViewModel: ObservableObject {
+final class StationSelectionViewModel: ObservableObject, Sendable {
     @Published var searchText: String = ""
-
-    let stations = [
-        "Курский вокзал",
-        "Балтийский вокзал",
-        "Ленинградский вокзал",
-        "Московский вокзал",
-        "Ярославский вокзал",
-        "Казанский вокзал"
-    ]
     
-    var filteredStations: [String] {
-        if searchText.isEmpty {
-            return stations
-        } else {
-            return stations.filter { $0.localizedCaseInsensitiveContains(searchText) }
+    let city: City
+    
+    init(city: City) {
+        self.city = city
+    }
+    
+    var filteredStations: [Station] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else {
+            return city.stations
         }
+        return city.stations.filter { $0.name.localizedCaseInsensitiveContains(query) }
     }
 }

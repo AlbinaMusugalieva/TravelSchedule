@@ -6,6 +6,7 @@
 //
 import SwiftUI
 
+@MainActor
 struct CarrierDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: CarrierDetailViewModel

@@ -8,7 +8,7 @@ import SwiftUI
 import Combine
 
 @MainActor
-final class CarrierDetailViewModel: ObservableObject {
+final class CarrierDetailViewModel: ObservableObject, Sendable {
     @Published var carrierName: String = "Загрузка..."
     @Published var carrierEmail: String = "—"
     @Published var carrierPhone: String = "—"

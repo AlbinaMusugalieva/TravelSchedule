@@ -9,24 +9,24 @@ import Foundation
 import OpenAPIRuntime
 
 actor NetworkClient: Sendable {
-    private let copyrightService: CopyrightServiceProtocol
-    private let allStationsService: AllStationsServiceProtocol
-    private let carrierInfoService: CarrierInfoServiceProtocol
-    private let nearestCityService: NearestCityServiceProtocol
-    private let nearestStationsService: NearestStationsServiceProtocol
-    private let routeStationsService: RouteStationsServiceProtocol
-    private let scheduleBetweenStationsService: ScheduleBetweenStationsServiceProtocol
-    private let stationScheduleService: StationScheduleServiceProtocol
+    private let copyrightService: CopyrightServiceProtocol & Sendable
+    private let allStationsService: AllStationsServiceProtocol & Sendable
+    private let carrierInfoService: CarrierInfoServiceProtocol & Sendable
+    private let nearestCityService: NearestCityServiceProtocol & Sendable
+    private let nearestStationsService: NearestStationsServiceProtocol & Sendable
+    private let routeStationsService: RouteStationsServiceProtocol & Sendable
+    private let scheduleBetweenStationsService: ScheduleBetweenStationsServiceProtocol & Sendable
+    private let stationScheduleService: StationScheduleServiceProtocol & Sendable
     
     init(
-        copyrightService: CopyrightServiceProtocol,
-        allStationsService: AllStationsServiceProtocol,
-        carrierInfoService: CarrierInfoServiceProtocol,
-        nearestCityService: NearestCityServiceProtocol,
-        nearestStationsService: NearestStationsServiceProtocol,
-        routeStationsService: RouteStationsServiceProtocol,
-        scheduleBetweenStationsService: ScheduleBetweenStationsServiceProtocol,
-        stationScheduleService: StationScheduleServiceProtocol
+        copyrightService: CopyrightServiceProtocol & Sendable,
+        allStationsService: AllStationsServiceProtocol & Sendable,
+        carrierInfoService: CarrierInfoServiceProtocol & Sendable,
+        nearestCityService: NearestCityServiceProtocol & Sendable,
+        nearestStationsService: NearestStationsServiceProtocol & Sendable,
+        routeStationsService: RouteStationsServiceProtocol & Sendable,
+        scheduleBetweenStationsService: ScheduleBetweenStationsServiceProtocol & Sendable,
+        stationScheduleService: StationScheduleServiceProtocol & Sendable
     ) {
         self.copyrightService = copyrightService
         self.allStationsService = allStationsService
@@ -98,7 +98,8 @@ actor NetworkClient: Sendable {
 }
 
 extension Components.Schemas.Segment {
-    nonisolated func toTrainTrip() -> TrainTrip {
+    @MainActor
+     func toTrainTrip() -> TrainTrip {
         let carrierName = self.thread?.carrier?.title ?? "Перевозчик"
         
         let timeFormatter = DateFormatter()

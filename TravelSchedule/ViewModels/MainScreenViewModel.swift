@@ -9,7 +9,7 @@ import SwiftUI
 import Combine
 
 @MainActor
-final class MainScreenViewModel: ObservableObject {
+final class MainScreenViewModel: ObservableObject, Sendable {
     @Published var departureCity: String = ""
     @Published var departureStation: String = ""
     @Published var arrivalCity: String = ""
@@ -43,4 +43,38 @@ final class MainScreenViewModel: ObservableObject {
         showStoriesFullscreen = true
         stories[index].isWatched = true
     }
+    
+    func selectStation(_ station: Station) {
+            if isSelectingForSource {
+                departureStation = station.name
+                departureCode = station.code
+                
+                if station.code == "s9602494" || station.code == "s9602554" {
+                    departureCity = "Санкт-Петербург"
+                } else if station.code == "s9613143" {
+                    departureCity = "Сочи"
+                } else if station.code == "s9613123" {
+                    departureCity = "Краснодар"
+                } else if station.code == "s9610011" {
+                    departureCity = "Казань"
+                } else {
+                    departureCity = "Москва"
+                }
+            } else {
+                arrivalStation = station.name
+                arrivalCode = station.code
+                
+                if station.code == "s9602494" || station.code == "s9602554" {
+                    arrivalCity = "Санкт-Петербург"
+                } else if station.code == "s9613143" {
+                    arrivalCity = "Сочи"
+                } else if station.code == "s9613123" {
+                    arrivalCity = "Краснодар"
+                } else if station.code == "s9610011" {
+                    arrivalCity = "Казань"
+                } else {
+                    arrivalCity = "Москва"
+                }
+            }
+        }
 }

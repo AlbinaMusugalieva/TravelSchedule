@@ -14,7 +14,7 @@ enum ScreenState {
 }
 
 @MainActor
-final class CitySelectionViewModel: ObservableObject {
+final class CitySelectionViewModel: ObservableObject, Sendable {
     @Published var searchText = ""
     @Published var cities: [City] = []
     @Published var screenState: ScreenState = .loading

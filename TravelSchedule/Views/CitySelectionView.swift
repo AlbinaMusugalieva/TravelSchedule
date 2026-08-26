@@ -7,9 +7,10 @@
 
 import SwiftUI
 
+@MainActor
 struct CitySelectionView: View {
     @Binding var isPresented: Bool
-    var onSelectStation: (Station) -> Void
+    var onSelectStation: @Sendable (Station) -> Void
     @Environment(\.colorScheme) private var colorScheme
     
     @StateObject private var viewModel = CitySelectionViewModel()

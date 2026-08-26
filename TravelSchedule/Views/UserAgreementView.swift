@@ -1,14 +1,21 @@
 import SwiftUI
 import WebKit
+import Combine
 
-struct UserAgreementView: View {
-    let url: URL
+@MainActor struct UserAgreementView: View {
+    @Environment(\.dismiss) private var dismiss: DismissAction
     @Binding var isPresented: Bool
-    @Environment(\.dismiss) private var dismiss
+    
+    @StateObject private var viewModel: UserAgreementViewModel
+    
+    init(url: URL, isPresented: Binding<Bool>) {
+        self._isPresented = isPresented
+        self._viewModel = StateObject(wrappedValue: UserAgreementViewModel(url: url))
+    }
     
     var body: some View {
         ZStack {
-            WebViewContainer(url: url)
+            WebViewContainer(url: viewModel.url)
                 .ignoresSafeArea(edges: .bottom)
         }
         .navigationTitle("Пользовательское соглашение")

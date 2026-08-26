@@ -14,6 +14,7 @@ struct Stories: Identifiable, Sendable {
     var isWatched: Bool
 }
 
+@MainActor 
 var mockStories: [Stories] = [
     Stories(image: .stories1, title: "Text Text Text Text Text Text Text Text Text Text", isWatched: false),
     Stories(image: .stories2, title: "Text Text Text Text Text Text Text Text Text Text", isWatched: false),
@@ -35,7 +36,7 @@ struct City: Identifiable, Sendable {
     let stations: [Station] 
 }
 
-struct TrainTrip: Identifiable {
+struct TrainTrip: Identifiable, Sendable {
     let id = UUID()
     let carrierName: String
     let logoImage: ImageResource

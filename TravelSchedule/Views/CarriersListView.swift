@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 struct CarriersListView: View {
     @Binding var networkState: AppNetworkState
     
@@ -133,14 +134,16 @@ struct CarriersListView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
-        .onAppear {
-            Task {
-                await viewModel.fetchRealSchedule()
-            }
+        .task {
+            await viewModel.fetchRealSchedule()
         }
         .fullScreenCover(isPresented: $isShowingFilters) {
-            FiltersView(initialFilters: appliedFilters) { newFilters in
-                appliedFilters = newFilters
+            FiltersView(initialFilters: appliedFilters) { @Sendable newFilters in
+                Task {
+                    await MainActor.run {
+                        appliedFilters = newFilters
+                    }
+                }
             }
         }
     }

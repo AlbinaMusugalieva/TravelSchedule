@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 struct StoriesFullscreenView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var stories: [Stories]
@@ -122,13 +123,14 @@ struct StoriesFullscreenView: View {
                     }
                 }
         )
-        .onAppear {
-            viewModel.startTimer {
-                showNextStory()
+        .task {
+            viewModel.startTimer { @Sendable in
+                Task {
+                    await MainActor.run {
+                        showNextStory()
+                    }
+                }
             }
-        }
-        .onDisappear {
-            viewModel.stopTimer()
         }
     }
     
@@ -147,8 +149,12 @@ struct StoriesFullscreenView: View {
             viewModel.resetProgress()
             currentIndex += 1
             stories[currentIndex].isWatched = true
-            viewModel.startTimer {
-                showNextStory()
+            viewModel.startTimer { @Sendable in
+                Task {
+                    await MainActor.run {
+                        showNextStory()
+                    }
+                }
             }
         } else {
             dismiss()
@@ -159,13 +165,20 @@ struct StoriesFullscreenView: View {
         if currentIndex > 0 {
             viewModel.resetProgress()
             currentIndex -= 1
-            viewModel.startTimer {
-                showNextStory()
+            viewModel.startTimer { @Sendable in
+                Task {
+                    await MainActor.run {
+                        showNextStory()
+                    }
+                }
             }
         } else {
-            viewModel.resetProgress()
-            viewModel.startTimer {
-                showNextStory()
+            viewModel.startTimer { @Sendable in
+                Task {
+                    await MainActor.run {
+                        showNextStory()
+                    }
+                }
             }
         }
     }
