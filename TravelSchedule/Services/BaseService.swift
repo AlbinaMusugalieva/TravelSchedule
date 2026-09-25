@@ -11,7 +11,7 @@ enum ServiceError: Error {
     case invalidResponse
 }
 
-class BaseService {
+class BaseService: Sendable {
     let client: Client
     let apikey: String
     

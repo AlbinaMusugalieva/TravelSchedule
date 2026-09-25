@@ -6,19 +6,15 @@
 //
 
 import SwiftUI
-import Combine
 
+@MainActor
 struct StoriesFullscreenView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var stories: [Stories]
     @State var currentIndex: Int
     
-    private let storyDuration: Double = 10.0
-    @State private var progress: Double = 0.0
-    
+    @StateObject private var viewModel = StoriesFullscreenViewModel()
     @State private var dragOffset: CGSize = .zero
-    
-    private let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     
     var body: some View {
         ZStack {
@@ -92,22 +88,22 @@ struct StoriesFullscreenView: View {
             }
             
             HStack(spacing: 0) {
-                           Color.clear
-                               .contentShape(Rectangle())
-                               .onTapGesture {
-                                   showPreviousStory()
-                               }
-                               .frame(width: UIScreen.main.bounds.width * 0.33)
-                           
-                           Color.clear
-                               .contentShape(Rectangle())
-                               .onTapGesture {
-                                   showNextStory()
-                               }
-                       }
-                       .frame(height: UIScreen.main.bounds.height * 0.8)
-                       .frame(maxHeight: .infinity, alignment: .bottom)
-                       .zIndex(1)
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        showPreviousStory()
+                    }
+                    .frame(width: UIScreen.main.bounds.width * 0.33)
+                
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        showNextStory()
+                    }
+            }
+            .frame(height: UIScreen.main.bounds.height * 0.8)
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .zIndex(1)
         }
         .offset(y: dragOffset.height > 0 ? dragOffset.height : 0)
         .gesture(
@@ -127,8 +123,14 @@ struct StoriesFullscreenView: View {
                     }
                 }
         )
-        .onReceive(timer) { _ in
-            updateProgress()
+        .task {
+            viewModel.startTimer { @Sendable in
+                Task {
+                    await MainActor.run {
+                        showNextStory()
+                    }
+                }
+            }
         }
     }
     
@@ -136,29 +138,24 @@ struct StoriesFullscreenView: View {
         if index < currentIndex {
             return totalWidth
         } else if index == currentIndex {
-            return totalWidth * CGFloat(progress)
+            return totalWidth * CGFloat(viewModel.progress)
         } else {
             return 0
         }
     }
     
-    private func updateProgress() {
-        let step = 0.1 / storyDuration
-        
-        withAnimation(.linear(duration: 0.1)) {
-            if progress < 1.0 {
-                progress += step
-            } else {
-                showNextStory()
-            }
-        }
-    }
-    
     private func showNextStory() {
         if currentIndex < stories.count - 1 {
-            progress = 0.0
+            viewModel.resetProgress()
             currentIndex += 1
             stories[currentIndex].isWatched = true
+            viewModel.startTimer { @Sendable in
+                Task {
+                    await MainActor.run {
+                        showNextStory()
+                    }
+                }
+            }
         } else {
             dismiss()
         }
@@ -166,10 +163,23 @@ struct StoriesFullscreenView: View {
     
     private func showPreviousStory() {
         if currentIndex > 0 {
-            progress = 0.0
+            viewModel.resetProgress()
             currentIndex -= 1
+            viewModel.startTimer { @Sendable in
+                Task {
+                    await MainActor.run {
+                        showNextStory()
+                    }
+                }
+            }
         } else {
-            progress = 0.0
+            viewModel.startTimer { @Sendable in
+                Task {
+                    await MainActor.run {
+                        showNextStory()
+                    }
+                }
+            }
         }
     }
 }

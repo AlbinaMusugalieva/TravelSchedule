@@ -7,21 +7,13 @@
 
 import SwiftUI
 
+@MainActor
 struct CitySelectionView: View {
     @Binding var isPresented: Bool
-    var onSelect: (String, String) -> Void
-    @State private var searchText: String = ""
+    var onSelectStation: @Sendable (Station) -> Void
     @Environment(\.colorScheme) private var colorScheme
     
-    let cities = ["Москва", "Санкт-Петербург", "Сочи", "Горный воздух", "Краснодар", "Казань", "Омск"]
-    
-    var filteredCities: [String] {
-        if searchText.isEmpty {
-            return cities
-        } else {
-            return cities.filter { $0.localizedCaseInsensitiveContains(searchText) }
-        }
-    }
+    @StateObject private var viewModel = CitySelectionViewModel()
     
     var body: some View {
         NavigationStack {
@@ -34,88 +26,85 @@ struct CitySelectionView: View {
                             .font(.system(size: 20, weight: .medium))
                             .foregroundStyle(.ypBlack)
                     }
-                    
                     Spacer()
-                    
                     Text("Выбор города")
                         .font(.system(size: 17, weight: .bold))
                         .foregroundStyle(.ypBlack)
-                    
                     Spacer()
-                    
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20))
-                        .opacity(0)
+                    Image(systemName: "chevron.left").font(.system(size: 20)).opacity(0)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 
+                // Строка текстового поиска
                 HStack(spacing: 8) {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundStyle(.ypGreyUniversal)
-                    
-                    TextField("Введите запрос", text: $searchText)
+                    Image(systemName: "magnifyingglass").foregroundStyle(.ypGreyUniversal)
+                    TextField("Введите запрос", text: $viewModel.searchText)
                         .font(.system(size: 16))
                         .foregroundStyle(.ypBlack)
-                    
-                    if !searchText.isEmpty {
-                        Button {
-                            searchText = ""
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(.ypGreyUniversal)
-                        }
+                    if !viewModel.searchText.isEmpty {
+                        Button { viewModel.searchText = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.ypGreyUniversal) }
                     }
                 }
-                .padding(.horizontal, 12)
-                .frame(height: 36)
-                .background(
-                    colorScheme == .dark ? Color(.ypFillsTertiary) : Color(.ypLightGray)
-                )
-                .cornerRadius(10)
-                .padding([.horizontal, .bottom], 16)
+                .padding(.horizontal, 12).frame(height: 36)
+                .background(colorScheme == .dark ? Color(.ypFillsTertiary) : Color(.ypLightGray))
+                .cornerRadius(10).padding([.horizontal, .bottom], 16)
                 
-                if filteredCities.isEmpty {
+                switch viewModel.screenState {
+                case .loading:
                     Spacer()
-                    Text("Город не найден")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundStyle(.ypBlack)
+                    ProgressView()
+                        .tint(.blue)
                     Spacer()
-                } else {
-                    ScrollView {
-                        VStack(spacing: 0) {
-                            ForEach(filteredCities, id: \.self) { city in
-                                NavigationLink(destination: StationSelectionView(
-                                    cityName: city,
-                                    isRootPresented: $isPresented,
-                                    onSelectStation: { selectedStation in
-                                        onSelect(city, selectedStation)
+                    
+                case .error:
+                    Spacer()
+                    Text("Ошибка загрузки данных")
+                        .foregroundColor(.red)
+                    Spacer()
+                    
+                case .content:
+                    if viewModel.filteredCities.isEmpty {
+                        Spacer()
+                        Text("Город не найден")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundStyle(.ypBlack)
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 0) {
+                                ForEach(viewModel.filteredCities) { city in
+                                    NavigationLink(destination: StationSelectionView(
+                                        city: city,
+                                        isRootPresented: $isPresented,
+                                        onSelectStation: onSelectStation
+                                    )) {
+                                        HStack {
+                                            Text(city.name)
+                                                .font(.system(size: 17, weight: .regular))
+                                                .foregroundStyle(.ypBlack)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(.system(size: 14, weight: .semibold))
+                                                .foregroundStyle(.ypBlack)
+                                        }
+                                        .padding(.horizontal, 16)
+                                        .frame(height: 54)
+                                        .contentShape(Rectangle())
                                     }
-                                )) {
-                                    HStack {
-                                        Text(city)
-                                            .font(.system(size: 17, weight: .regular))
-                                            .foregroundStyle(.ypBlack)
-                                        
-                                        Spacer()
-                                        
-                                        Image(systemName: "chevron.right")
-                                            .font(.system(size: 14, weight: .semibold))
-                                            .foregroundStyle(.ypBlack)
-                                    }
-                                    .padding(.horizontal, 16)
-                                    .frame(height: 54)
-                                    .contentShape(Rectangle())
+                                    .buttonStyle(.plain)
+                                    
+                                    Divider().padding(.horizontal, 16)
                                 }
-                                
-                                Divider()
-                                    .padding(.horizontal, 16)
                             }
                         }
                     }
                 }
             }
             .background(.ypWhite)
+            .task {
+                await viewModel.loadCities()
+            }
         }
     }
 }

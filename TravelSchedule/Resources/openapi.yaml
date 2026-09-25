@@ -4,7 +4,7 @@ info:
   description: API Яндекс.Расписаний
   version: 3.0.0
 servers:
-  - url: https://yandex.net
+  - url: https://api.rasp.yandex.net
 tags:
   - name: Список ближайших станций
     description: Список ближайших станций
